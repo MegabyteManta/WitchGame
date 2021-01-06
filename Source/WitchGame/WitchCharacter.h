@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "CollectibleObject.h"
 #include "WitchCharacter.generated.h"
 
 UCLASS(config = Game)
@@ -29,6 +30,18 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 		float BaseLookUpRate;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flying")
+		float FlyForce = 2.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collectible Objects")
+		TSet<ACollectibleObject*> Collected;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collectible Objects")
+		TSet<ACollectibleObject*> Deposited;
+
+	void Fly();
+	void StopFly();
+
 protected:
 
 	/** Called for forwards/backward input */
@@ -49,31 +62,36 @@ protected:
 	 */
 	void LookUpAtRate(float Rate);
 
-	//void Fly();
-
-	/*
-	// Resets HMD orientation in VR. 
-	void OnResetVR();
-
-	// Handler for when a touch input begins. 
-	void TouchStarted(ETouchIndex::Type FingerIndex, FVector Location);
-
-	// Handler for when a touch input stops. 
-	void TouchStopped(ETouchIndex::Type FingerIndex, FVector Location);
-	*/
-
-protected:
+//protected:
 	// Called when the game starts or when spawned
-	//virtual void BeginPlay() override;
+	virtual void BeginPlay() override;
 
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	// End of APawn interface
+
+	//Overlap event
+	UFUNCTION()
+		void OnBeginOverlap(class UPrimitiveComponent* HitComp,
+			class AActor* OtherActor, class UPrimitiveComponent* OtherComp,
+			int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+
+	//Collision event
+	UFUNCTION()
+		void OnHit(UPrimitiveComponent * HitComp, AActor * OtherActor, UPrimitiveComponent * OtherComp,
+			FVector NormalImpulse, const FHitResult & Hit);
+
 	int count = 0;
+
+	bool is_flying = false;
+
+
 
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+
 
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }

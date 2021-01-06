@@ -8,12 +8,18 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "CustomGameInstance.h"
+
+
+
 
 //////////////////////////////////////////////////////////////////////////
 // AWitchCharacter
 
 AWitchCharacter::AWitchCharacter()
 {
+	PrimaryActorTick.bCanEverTick = true;
+
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
@@ -48,12 +54,40 @@ AWitchCharacter::AWitchCharacter()
 }
 
 
+void AWitchCharacter::BeginPlay() {
+	Super::BeginPlay();
+	//GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &AWitchCharacter::OnHit);
+	//OverlapCapsule->OnComponentBeginOverlap.AddDynamic(this, &APlayerSack::OnBeginOverlap);
+}
+
+
 void AWitchCharacter::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Falling);
 	count++;
 	if (GetCharacterMovement()->MovementMode != EMovementMode::MOVE_Falling)
 		UE_LOG(LogTemp, Warning, TEXT("NOT FALLING %d"), count);
+	//if (GEngine)
+	//	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("This is bullshit"));
+	if (is_flying) {
+		GetCharacterMovement()->AddForce(FVector(0.f, 0.f, FlyForce*100000.f));
+	}
+
+	TArray<ACollectibleObject*> ToBeRemoved;
+	for (ACollectibleObject* CollectibleObject : Collected) {
+		if (!CollectibleObject->Deposited && CollectibleObject->Collected) {
+			if (FVector::Dist(CollectibleObject->GetActorLocation(), GetActorLocation()) > 500.f) {
+				//Collected.Remove(CollectibleObject);
+				ToBeRemoved.Add(CollectibleObject);
+				CollectibleObject->Collected = false;
+				UCustomGameInstance* CustomGameInstance = Cast<UCustomGameInstance>(GetGameInstance());
+				CustomGameInstance->UpdateScore(-1);
+			}
+		}
+	}
+	for (ACollectibleObject* CollectibleObject : ToBeRemoved) {
+		Collected.Remove(CollectibleObject);
+	}
 }
 
 
@@ -67,8 +101,8 @@ void AWitchCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
-	//PlayerInputComponent->BindAction("Fly", IE_Pressed, this, &AWitchCharacter::Fly);
-
+	PlayerInputComponent->BindAction("Fly", IE_Pressed, this, &AWitchCharacter::Fly);
+	PlayerInputComponent->BindAction("Fly", IE_Released, this, &AWitchCharacter::StopFly);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AWitchCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AWitchCharacter::MoveRight);
@@ -80,22 +114,7 @@ void AWitchCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	PlayerInputComponent->BindAxis("TurnRate", this, &AWitchCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("LookUpRate", this, &AWitchCharacter::LookUpAtRate);
-
-	// handle touch devices
-	//PlayerInputComponent->BindTouch(IE_Pressed, this, &AWitchCharacter::TouchStarted);
-	//PlayerInputComponent->BindTouch(IE_Released, this, &AWitchCharacter::TouchStopped);
-
-	// VR headset functionality
-	//PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &AWitchCharacter::OnResetVR);
 }
-
-/*
-void AWitchCharacter::Fly() {
-	//GetCharacterMovement()->bCheatFlying = true;
-	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
-	//Jump();
-}
-*/
 
 void AWitchCharacter::TurnAtRate(float Rate)
 {
@@ -138,19 +157,29 @@ void AWitchCharacter::MoveRight(float Value)
 	}
 }
 
-/*
-void AWitchCharacter::OnResetVR()
+void AWitchCharacter::OnHit(UPrimitiveComponent * HitComp, AActor * OtherActor, UPrimitiveComponent * OtherComp, FVector NormalImpulse, const FHitResult & Hit)
 {
-	UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition();
+	//if (OtherActor->ActorHasTag("WaxBody")) {
+	count++;
+	UE_LOG(LogTemp, Warning, TEXT("Collided with %s %d"), *OtherActor->GetName(), count);
+	//PickUp();
+	//}
 }
 
-void AWitchCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
+void AWitchCharacter::OnBeginOverlap(UPrimitiveComponent * HitComp, AActor * OtherActor, UPrimitiveComponent * OtherComp,
+	int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
-	Jump();
+	count++;
+	UE_LOG(LogTemp, Warning, TEXT("Overlapped with %s %d"), *OtherActor->GetName(), count);
+	//OtherActor->Destroy();
 }
 
-void AWitchCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector Location)
-{
-	StopJumping();
+void AWitchCharacter::Fly() {
+	//GetCharacterMovement()->AddForce(FVector(0.f,0.f,FlyForce*100000.f));
+	is_flying = true;
 }
-*/
+
+void AWitchCharacter::StopFly() {
+	//GetCharacterMovement()->AddForce(FVector(0.f,0.f,FlyForce*100000.f));
+	is_flying = false;
+}
