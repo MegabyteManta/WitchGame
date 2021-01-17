@@ -2,6 +2,9 @@
 
 
 #include "Pathfinding.h"
+#include "GameFramework/Actor.h"
+#include "DrawDebugHelpers.h"
+
 
 // Sets default values
 APathfinding::APathfinding()
@@ -190,8 +193,6 @@ bool APathfinding::Walkable(Node NodeA, Node NodeB) {
 
 	}
 	return true;
-
-	return false;
 }
 
 //This is for simplifying path down to points when direction changes
@@ -213,9 +214,9 @@ TArray<FVector> APathfinding::SimplifyPath(TArray<Node> Path) {
 //Get distance between Nodes
 int APathfinding::GetDistance(Node NodeA, Node NodeB) {
 	return FVector::Dist(NodeA.WorldPosition, NodeB.WorldPosition);
-	int DstX = UKismetMathLibrary::Abs(NodeA.X - NodeB.X);
-	int DstY = UKismetMathLibrary::Abs(NodeA.Y - NodeB.Y);
-	int DstZ = UKismetMathLibrary::Abs(NodeA.Z - NodeB.Z);
+	int DstX = abs(NodeA.X - NodeB.X);
+	int DstY = abs(NodeA.Y - NodeB.Y);
+	int DstZ = abs(NodeA.Z - NodeB.Z);
 	//return sqrt(DstX*DstX + DstY * DstY + DstZ * DstZ);
 	return DstX + DstY + DstZ;
 	int Dist = 0;

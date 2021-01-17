@@ -12,15 +12,53 @@ class AWitchCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
-	/** Camera boom positioning the camera behind the character */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-		class USpringArmComponent* CameraBoom;
+public:
 
-	/** Follow camera */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-		class UCameraComponent* FollowCamera;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flying")
+		float FlyForce = 2.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collectible Objects")
+		TSet<ACollectibleObject*> CollectedObjects;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collectible Objects")
+		TSet<ACollectibleObject*> DepositedObjects;
+
+
+protected:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stacking")
+		AActor* Box;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stacking")
+		float DropDistance = 1000;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Weight")
+		float Weight = 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weight")
+		float WeightDelta = .2f;
+
+	UFUNCTION(BlueprintCallable, Category = "Weight")
+		void UpdateWeight(float Delta);
+
+	float StartingMass;
+	float StartingFriction;
+	float StartingControl;
+	void Fly();
+	void StopFly();
+	void RemoveCollectedIfDropped();
+
+	int count = 0;
+
+	bool is_flying = false;
+
+
+
 public:
 	AWitchCharacter();
+
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
 
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
@@ -30,39 +68,12 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 		float BaseLookUpRate;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flying")
-		float FlyForce = 2.f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collectible Objects")
-		TSet<ACollectibleObject*> Collected;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collectible Objects")
-		TSet<ACollectibleObject*> Deposited;
-
-	void Fly();
-	void StopFly();
+	/** Returns CameraBoom subobject **/
+	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+	/** Returns FollowCamera subobject **/
+	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
 protected:
-
-	/** Called for forwards/backward input */
-	void MoveForward(float Value);
-
-	/** Called for side to side input */
-	void MoveRight(float Value);
-
-	/**
-	 * Called via input to turn at a given rate.
-	 * @param Rate	This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
-	 */
-	void TurnAtRate(float Rate);
-
-	/**
-	 * Called via input to turn look up/down at a given rate.
-	 * @param Rate	This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
-	 */
-	void LookUpAtRate(float Rate);
-
-//protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -81,20 +92,29 @@ protected:
 		void OnHit(UPrimitiveComponent * HitComp, AActor * OtherActor, UPrimitiveComponent * OtherComp,
 			FVector NormalImpulse, const FHitResult & Hit);
 
-	int count = 0;
+	/** Camera boom positioning the camera behind the character */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+		class USpringArmComponent* CameraBoom;
 
-	bool is_flying = false;
+	/** Follow camera */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+		class UCameraComponent* FollowCamera;
 
+	/** Called for forwards/backward input */
+	void MoveForward(float Value);
 
+	/** Called for side to side input */
+	void MoveRight(float Value);
 
-public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	/**
+	 * Called via input to turn at a given rate.
+	 * @param Rate	This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
+	 */
+	void TurnAtRate(float Rate);
 
-
-
-	/** Returns CameraBoom subobject **/
-	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
-	/** Returns FollowCamera subobject **/
-	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	/**
+	 * Called via input to turn look up/down at a given rate.
+	 * @param Rate	This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
+	 */
+	void LookUpAtRate(float Rate);
 };

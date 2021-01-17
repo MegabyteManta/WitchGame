@@ -3,24 +3,29 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Line.h"
 
 /**
  *
  */
-struct WITCHGAME_API Line
+class WITCHGAME_API Line
 {
+public:
 	Line(FVector PointOnLine, FVector PointPerpendicularToLine);
 	Line();
 	~Line();
 
-	const float VerticalLineGradient = 1e5f;
+	float VerticalLineGradient = 1e5f;
 
-	float Gradient;
-	float YIntercept;
+	FVector Gradient;
 	FVector PointOnLine1;
 	FVector PointOnLine2;
 
-	float GradientPerpendicular;
+	FVector GradientPerpendicular;
 
-	bool ApproachSide;
+	bool ApproachSide = false;
+
+	bool GetSide(FVector Point);
+
+	bool HasCrossedLine(FVector Point);
 };

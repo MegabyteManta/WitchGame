@@ -58,6 +58,9 @@ void AWitchCharacter::BeginPlay() {
 	Super::BeginPlay();
 	//GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &AWitchCharacter::OnHit);
 	//OverlapCapsule->OnComponentBeginOverlap.AddDynamic(this, &APlayerSack::OnBeginOverlap);
+	StartingMass = GetCharacterMovement()->Mass;
+	StartingFriction = GetCharacterMovement()->FallingLateralFriction;
+	StartingControl = GetCharacterMovement()->AirControl;
 }
 
 
@@ -73,22 +76,53 @@ void AWitchCharacter::Tick(float DeltaTime) {
 		GetCharacterMovement()->AddForce(FVector(0.f, 0.f, FlyForce*100000.f));
 	}
 
+	if (Box)
+		RemoveCollectedIfDropped();
+	/*
+	if (Box)
+		Box->SetActorLocation(FVector(GetActorLocation().X-60.f, GetActorLocation().Y, GetActorLocation().Z-120.f));
+	
+	if (BoxCenter) {
+		BoxCenter->GetComponentLocation();
+
+	}
+	*/
+	//GetCharacterMovement()->SafeMoveUpdatedComponent
+
+}
+
+//Checks if collected objects are dropped, and if so, removes them from sey
+void AWitchCharacter::RemoveCollectedIfDropped() {
 	TArray<ACollectibleObject*> ToBeRemoved;
-	for (ACollectibleObject* CollectibleObject : Collected) {
+	for (ACollectibleObject* CollectibleObject : CollectedObjects) {
 		if (!CollectibleObject->Deposited && CollectibleObject->Collected) {
-			if (FVector::Dist(CollectibleObject->GetActorLocation(), GetActorLocation()) > 500.f) {
+			if (FVector::DistSquared(CollectibleObject->GetActorLocation(), Box->GetActorLocation()) > pow(DropDistance,2)) {
 				//Collected.Remove(CollectibleObject);
 				ToBeRemoved.Add(CollectibleObject);
 				CollectibleObject->Collected = false;
 				UCustomGameInstance* CustomGameInstance = Cast<UCustomGameInstance>(GetGameInstance());
 				CustomGameInstance->UpdateScore(-1);
+				UpdateWeight(-WeightDelta);
 			}
 		}
 	}
 	for (ACollectibleObject* CollectibleObject : ToBeRemoved) {
-		Collected.Remove(CollectibleObject);
+		CollectedObjects.Remove(CollectibleObject);
 	}
 }
+
+void AWitchCharacter::UpdateWeight(float Delta) {
+	Weight += Delta;
+	if (Weight == 0) {
+		UE_LOG(LogTemp, Warning, TEXT("WEIGHT IS 0"));
+	}
+	else {
+		GetCharacterMovement()->Mass = StartingMass*Weight;
+		GetCharacterMovement()->FallingLateralFriction = StartingFriction * 1/Weight;
+		GetCharacterMovement()->AirControl = StartingControl * 1 / Weight;
+	}
+}
+
 
 
 //////////////////////////////////////////////////////////////////////////

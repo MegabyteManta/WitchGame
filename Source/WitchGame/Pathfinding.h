@@ -3,12 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
 #include "Node.h"
 #include "Grid.h"
-#include "Kismet/KismetMathLibrary.h"
-#include "DrawDebugHelpers.h"
-#include "Engine/Engine.h"
 #include "Pathfinding.generated.h"
 
 UCLASS()

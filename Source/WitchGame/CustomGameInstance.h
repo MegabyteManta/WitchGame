@@ -14,27 +14,27 @@ class WITCHGAME_API UCustomGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
 
-	public:
-		UCustomGameInstance();
+public:
+	UCustomGameInstance();
 		
-		UFUNCTION(BlueprintCallable, Category = "Timer")
-		void StartTimer();
-		UFUNCTION(BlueprintCallable, Category = "Scoring")
-		void UpdateScore(int points);
-		UFUNCTION(BlueprintCallable, Category = "Scoring")
-		void DepositScore();
+	UFUNCTION(BlueprintCallable, Category = "Timer")
+	void StartTimer();
+	UFUNCTION(BlueprintCallable, Category = "Scoring")
+	void UpdateScore(int points);
+	UFUNCTION(BlueprintCallable, Category = "Scoring")
+	void DepositScore();
 
 
 
-	protected:
-		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Scoring")
-		int TempScore;
-		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Scoring")
-		int FinalScore;
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Scoring")
+	int TempScore;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Scoring")
+	int FinalScore;
 
-		virtual void Init() override;
+	virtual void Init() override;
 
-		virtual void Shutdown() override;
+	virtual void Shutdown() override;
 
-		void EndGame();
+	void EndGame();
 };

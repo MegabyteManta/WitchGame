@@ -3,16 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/ActorComponent.h"
 #include "Node.h"
 #include "Grid.h"
 #include "Pathfinding.h"
-#include "Math/UnrealMathUtility.h"
-#include "GenericPlatform/GenericPlatformMath.h" 
-#include "Math/Vector.h" 
-#include "GameFramework/Actor.h" 
-#include "DrawDebugHelpers.h"
+#include "Path.h"
 #include "PathTraveler.generated.h"
+
+#define FOLLOWING_PATH 0
+#define FOLLOWING_PLAYER 1 
 
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -20,15 +18,13 @@ class WITCHGAME_API UPathTraveler : public UActorComponent
 {
 	GENERATED_BODY()
 
-		TArray<FVector> Waypoints;
+	Path Route;
+	TArray<FVector> Waypoints;
 	FVector CurrentWaypoint;
 	int WaypointIndex;
-	//int WaypointPrevious;
 	Node TargetNodeOld = Node();
-#define FOLLOWING_PATH 0
-#define FOLLOWING_PLAYER 1 
-	int state = FOLLOWING_PATH;
 
+	int state = FOLLOWING_PATH;
 	int PositionIndex = 0;
 
 	//Follow a specified path
@@ -80,11 +76,15 @@ public:
 
 	//Actor's velocity
 	UPROPERTY(EditAnywhere)
-		float Velocity = 0;
+		float Velocity = 0.f;
 
 	//Actor's rotation rate
 	UPROPERTY(EditAnywhere)
-		float RotationRate = 0;
+		float RotationRate = 0.f;
+
+	//Smoothing path
+	UPROPERTY(EditAnywhere)
+		float TurnDst = 5.f;
 
 	//Anything greater than the view threshold is within view
 	UPROPERTY(EditAnywhere)

@@ -2,6 +2,12 @@
 
 
 #include "PathTraveler.h"
+#include "Components/ActorComponent.h"
+#include "GameFramework/Actor.h" 
+#include "Math/UnrealMathUtility.h"
+#include "DrawDebugHelpers.h"
+
+
 
 // Sets default values for this component's properties
 UPathTraveler::UPathTraveler()
@@ -103,10 +109,11 @@ void UPathTraveler::FollowPlayer(float DeltaTime) {
 void UPathTraveler::Travel(float DeltaTime, FVector TargetLocation)
 {
 	//UE_LOG(LogTemp, Warning, TEXT("TRAVELLING"));
-	FVector2D ActorLocation2D = FVector2D(GetOwner()->GetActorLocation().X, GetOwner()->GetActorLocation().Y);
+	//FVector2D ActorLocation2D = FVector2D(GetOwner()->GetActorLocation().X, GetOwner()->GetActorLocation().Y);
 	FVector ActorLocation = GetOwner()->GetActorLocation();
-	FVector2D CurrentWaypoint2D = FVector2D(CurrentWaypoint.X, CurrentWaypoint.Y);
-	FRotator CurrentWaypointRotation = UKismetMathLibrary::FindLookAtRotation(GetOwner()->GetActorLocation(), CurrentWaypoint);
+	//FVector2D CurrentWaypoint2D = FVector2D(CurrentWaypoint.X, CurrentWaypoint.Y);
+	//FRotator CurrentWaypointRotation = UKismetMathLibrary::FindLookAtRotation(GetOwner()->GetActorLocation(), CurrentWaypoint);
+	FRotator CurrentWaypointRotation = FVector(CurrentWaypoint - ActorLocation).Rotation();
 	//I should just use nodes here
 	//If the actor has reached the current waypoint, move onto the next waypoint
 	//UE_LOG(LogTemp, Warning, TEXT("CURRENT WAYPOINT: %s"), *CurrentWaypoint.ToString());
@@ -115,7 +122,7 @@ void UPathTraveler::Travel(float DeltaTime, FVector TargetLocation)
 	//This fixes it by forcing it to move until it's not next to a boundary
 	//Maybe change it so that it only affects it if it needs to cross a boundary, not just be close to it
 	bool BoundaryCleared = true;
-	for (Node Neighbor : Grid->GetNeighbors(Grid->NodeFromWorldPoint(GetOwner()->GetActorLocation()))) {
+	for (Node Neighbor : Grid->GetNeighbors(Grid->NodeFromWorldPoint(ActorLocation))) {
 		if (!Neighbor.Walkable) {
 			BoundaryCleared = false;
 			break;
@@ -130,6 +137,8 @@ void UPathTraveler::Travel(float DeltaTime, FVector TargetLocation)
 			//UE_LOG(LogTemp, Warning, TEXT("RECALCING PATH"));
 			//Waypoints is the list of node positions
 			Waypoints = Pathfinder->FindPath(GetOwner()->GetActorLocation(), TargetLocation);
+			Route = Path(Waypoints, ActorLocation, TurnDst);
+
 			if (Waypoints.Num() == 0) {
 				UE_LOG(LogTemp, Warning, TEXT("ERROR: THERE ARE NO WAYPOINTS"));
 				FollowPath(DeltaTime);
@@ -157,19 +166,23 @@ void UPathTraveler::Travel(float DeltaTime, FVector TargetLocation)
 		CurrentWaypoint = Waypoints[WaypointIndex];
 		//CurrentWaypoint2D = FVector2D(CurrentWaypoint.X, CurrentWaypoint.Y);
 		if (WaypointIndex == Waypoints.Num() - 1) {
-			CurrentWaypointRotation = UKismetMathLibrary::FindLookAtRotation(ActorLocation, TargetLocation);
+			//CurrentWaypointRotation = UKismetMathLibrary::FindLookAtRotation(ActorLocation, TargetLocation);
+			CurrentWaypointRotation = FVector(TargetLocation - ActorLocation).Rotation();
 		}
 		else {
-			CurrentWaypointRotation = UKismetMathLibrary::FindLookAtRotation(ActorLocation, CurrentWaypoint);
+			//CurrentWaypointRotation = UKismetMathLibrary::FindLookAtRotation(ActorLocation, CurrentWaypoint);
+			CurrentWaypointRotation = FVector(CurrentWaypoint - ActorLocation).Rotation();
 		}
 	}
 	//Move and rotate the actor towards the current waypoint
 	//Just rotate towards target instead of node (the last waypoint is always the target's node)
 	if (WaypointIndex == Waypoints.Num() - 1) {
-		CurrentWaypointRotation = UKismetMathLibrary::FindLookAtRotation(ActorLocation, TargetLocation);
+		//CurrentWaypointRotation = UKismetMathLibrary::FindLookAtRotation(ActorLocation, TargetLocation);
+		CurrentWaypointRotation = FVector(TargetLocation - ActorLocation).Rotation();
 	}
 	else {
-		CurrentWaypointRotation = UKismetMathLibrary::FindLookAtRotation(ActorLocation, CurrentWaypoint);
+		//CurrentWaypointRotation = UKismetMathLibrary::FindLookAtRotation(ActorLocation, CurrentWaypoint);
+		CurrentWaypointRotation = FVector(CurrentWaypoint - ActorLocation).Rotation();
 	}
 	FRotator RotationStep = FMath::RInterpConstantTo(GetOwner()->GetActorRotation(), CurrentWaypointRotation, DeltaTime, RotationRate);
 	GetOwner()->SetActorRotation(FRotator(RotationStep.Pitch, RotationStep.Yaw, 0));
@@ -178,8 +191,8 @@ void UPathTraveler::Travel(float DeltaTime, FVector TargetLocation)
 	GetOwner()->SetActorLocation(LocationStep);
 	//FVector2D LocationStepp = FMath::Vector2DInterpConstantTo(ActorLocation2D, CurrentWaypoint2D, DeltaTime, Velocity);
 	//GetOwner()->SetActorLocation(FVector(LocationStepp.X, LocationStepp.Y, GetOwner()->GetActorLocation().Z));
-	UE_LOG(LogTemp, Warning, TEXT("CurrentWaypoint: %s"), *CurrentWaypoint.ToString());
-	UE_LOG(LogTemp, Warning, TEXT("LOCATION STEP: %s, ROTATION STEP: %s"), *LocationStep.ToString(), *RotationStep.ToString());
+	//UE_LOG(LogTemp, Warning, TEXT("CurrentWaypoint: %s"), *CurrentWaypoint.ToString());
+	//UE_LOG(LogTemp, Warning, TEXT("LOCATION STEP: %s, ROTATION STEP: %s"), *LocationStep.ToString(), *RotationStep.ToString());
 }
 
 //Is target in view of the actor?

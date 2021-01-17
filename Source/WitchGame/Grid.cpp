@@ -2,6 +2,12 @@
 
 
 #include "Grid.h"
+#include "GameFramework/Actor.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "Math/UnrealMathUtility.h"
+#include "Engine/World.h" 
+#include "DrawDebugHelpers.h"
+
 
 // Sets default values
 AGrid::AGrid()

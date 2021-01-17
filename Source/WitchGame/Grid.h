@@ -3,13 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
-#include "Math/UnrealMathUtility.h"
 #include "Node.h"
-#include "GameFramework/Actor.h" 
-#include "Kismet/KismetSystemLibrary.h"
-#include "Engine/World.h" 
-#include "DrawDebugHelpers.h"
 #include "Grid.generated.h"
 
 UCLASS()
