@@ -164,6 +164,7 @@ void AWitchCharacter::LookUpAtRate(float Rate)
 
 void AWitchCharacter::MoveForward(float Value)
 {
+	Value *= VelocityScale;
 	if ((Controller != NULL) && (Value != 0.0f))
 	{
 		// find out which way is forward
@@ -178,6 +179,7 @@ void AWitchCharacter::MoveForward(float Value)
 
 void AWitchCharacter::MoveRight(float Value)
 {
+	Value *= VelocityScale;
 	if ((Controller != NULL) && (Value != 0.0f))
 	{
 		// find out which way is right

@@ -16,6 +16,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flying")
 		float FlyForce = 2.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flying")
+		float VelocityScale = 1.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collectible Objects")
 		TSet<ACollectibleObject*> CollectedObjects;
@@ -40,6 +42,7 @@ protected:
 
 	UFUNCTION(BlueprintCallable, Category = "Weight")
 		void UpdateWeight(float Delta);
+
 
 	float StartingMass;
 	float StartingFriction;
