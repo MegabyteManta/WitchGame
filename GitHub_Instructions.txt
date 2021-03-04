@@ -1,0 +1,26 @@
+GitHub Instruction
+==================
+
+Making Changes:
+1. New Branch: When you want to start making changes, create a new branch
+	- Click on "Branch" -> "New branch..."
+	- Naming convention: "name.whatever_youre_doing.number", no uppercase or spaces
+	- Create branch based on develop (if you don't see develop, make sure you're current branch is develop)
+2. Committing: Commit frequently in order to save your progress (commit after you make a small improvement that works)
+	- "Changes" tab -> bottom left corner
+	- Write a summary and optionally write a description. Then click "Commit to [branch name]"
+3. Rebasing: If you want changes from develop but are not ready to merge with develop yet, rebase
+	- First, commit all your changes (follow 2. Committing) to save your work
+	- Switch "Current branch" to develop
+	- "Fetch origin"
+	- "Pull changes"
+	- Switch "Current branch" to your branch
+	- "Branch" tab at the top -> "Rebase current branch..."
+	- Select develop, then click "Start rebase"
+4. Merging: When you're all done with your branch, merge into develop, then push
+	- First, rebase with develop (follow 3. Rebasing) in order to make sure your branch is up to date with develop's changes
+	- Switch "Current branch" to develop
+	- "Branch" tab at the top -> "Marge into current branch..."
+	- Select your branch, "Merge [branch name] into develop"
+	- Finally, Push
+	- p.s. make sure to create a new branch now so that you don't forget and accidentally make changes directly on develop
