@@ -22,5 +22,5 @@ Making Changes:
 	- Switch "Current branch" to develop
 	- "Branch" tab at the top -> "Marge into current branch..."
 	- Select your branch, "Merge [branch name] into develop"
-	- Finally, Push
+	- Finally, "Push origin"
 	- p.s. make sure to create a new branch now so that you don't forget and accidentally make changes directly on develop
