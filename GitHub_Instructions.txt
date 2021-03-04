@@ -1,4 +1,4 @@
-GitHub Instruction
+GitHub Instructions
 ==================
 
 Making Changes:
